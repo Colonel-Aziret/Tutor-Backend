@@ -1,7 +1,9 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.5'
-    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.flywaydb.flyway' version '10.20.0'
+    id 'io.freefair.lombok' version '8.3'
 }
 
 group = 'com.example'
@@ -12,13 +14,43 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
-
+ext {
+    openApiStarterVersion = '2.1.0'
+    openApiVersion = '1.7.0'
+    apachePoiVersion = '5.2.3'
+    postgreSqlVersion = '42.7.2'
+}
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.3.4'
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.flywaydb:flyway-database-postgresql"
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:$openApiStarterVersion"
+    implementation "org.apache.poi:poi:$apachePoiVersion"
+    implementation "org.apache.poi:poi-ooxml:$apachePoiVersion"
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly "org.postgresql:postgresql:$postgreSqlVersion"
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.googlecode.libphonenumber:libphonenumber:8.13.29'
+    implementation("net.coobird:thumbnailator:0.4.1")
+
+
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    implementation "org.springframework.boot:spring-boot-starter-security"
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
