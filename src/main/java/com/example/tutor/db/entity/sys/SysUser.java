@@ -40,6 +40,9 @@ public class SysUser {
     @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     TutorDetails tutorDetails;
 
+    @Column(name = "telegram")
+    String telegram;
+
     @Column(name = "age")
     Integer age;
 
@@ -58,9 +61,6 @@ public class SysUser {
 
     @Column(name = "password", nullable = false)
     String password;
-
-    @Column(name = "telegram")
-    String telegram;
 
     @Builder.Default
     @Column(name = "phone_number_verified")

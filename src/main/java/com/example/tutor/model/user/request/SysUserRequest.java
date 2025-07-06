@@ -48,6 +48,9 @@ public class SysUserRequest {
     @Schema(description = "Адрес электронной почты пользователя", example = "ivanov@example.com")
     String email;
 
+    @Schema(description = "Ник в телеграм")
+    String telegram;
+
     @Schema(description = "Номер телефона пользователя", example = "+996111222333")
     String phone;
 

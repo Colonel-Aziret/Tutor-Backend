@@ -39,9 +39,6 @@ public class TutorDetails {
     @Column(name = "price")
     Double price;
 
-    @Column(name = "telegram")
-    String telegram;
-
     @Column(name = "experience")
     Integer experience;
 

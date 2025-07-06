@@ -15,6 +15,9 @@ public class TutorReviewRequestDto {
     @NotNull
     private Long tutorId;
 
+    @Schema(description = "ID родительского комментария, если это ответ на него")
+    Long parentId;
+
     @Schema(description = "Комментарий", example = "Очень хороший преподаватель!", maxLength = 1000)
     @NotBlank
     private String comment;
@@ -22,5 +25,5 @@ public class TutorReviewRequestDto {
     @Schema(description = "Оценка от 1 до 5", example = "5", minimum = "1", maximum = "5")
     @Min(1)
     @Max(5)
-    private int rating;
+    private Integer rating;
 }

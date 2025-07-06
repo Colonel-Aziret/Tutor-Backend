@@ -114,7 +114,6 @@ CREATE TABLE IF NOT EXISTS tutor_details
     price    DOUBLE PRECISION,
     city_id  BIGINT,
     about_me VARCHAR(1000),
-    telegram VARCHAR(255),
     experience INTEGER,
     online   BOOLEAN,
     offline  BOOLEAN,
@@ -131,11 +130,13 @@ CREATE TABLE IF NOT EXISTS tutor_reviews
     tutor_id     BIGINT                                      NOT NULL,
     author_id    BIGINT                                      NOT NULL,
     comment      VARCHAR(1000)                               NOT NULL,
-    rating       INTEGER CHECK (rating >= 1 AND rating <= 5) NOT NULL,
+    rating       INTEGER,
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP         NOT NULL,
+    parent_id    BIGINT,
 
     CONSTRAINT fk_review_tutor FOREIGN KEY (tutor_id) REFERENCES tutor_details (id) ON DELETE CASCADE,
-    CONSTRAINT fk_review_author FOREIGN KEY (author_id) REFERENCES sys_users (id) ON DELETE CASCADE
+    CONSTRAINT fk_review_author FOREIGN KEY (author_id) REFERENCES sys_users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_review_parent FOREIGN KEY (parent_id) REFERENCES tutor_reviews (id) ON DELETE CASCADE  -- 🔹 внешний ключ
 );
 
 CREATE TABLE IF NOT EXISTS tutor_education

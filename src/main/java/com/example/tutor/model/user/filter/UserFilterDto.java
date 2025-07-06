@@ -35,7 +35,8 @@ public class UserFilterDto extends BasePageRequest {
     Double maxRate;
     Double minPrice;
     Double maxPrice;
-    Long cityId;
+    List<Integer> cityIds;
+    List<Integer> subjectIds;
     Boolean online;
     Boolean offline;
     Boolean atTutor;

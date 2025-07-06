@@ -45,14 +45,13 @@ VALUES ('math', 'Математика', 'Математика', FALSE, NULL),
 
 
 INSERT INTO tutor_details (user_id, rate, price, city_id, about_me,
-                           telegram, experience,
+                            experience,
                            online, offline, at_tutor, address)
 VALUES (3, -- user_id (ID тьютора)
         4.8, -- rate
         2000.0, -- price
         NULL, -- city_id (например, 1 если город известен)
         'Опытный преподаватель математики с индивидуальным подходом',
-        '@math_tutor', -- telegram
         10, -- опыт в годах
         TRUE, -- online
         TRUE, -- offline

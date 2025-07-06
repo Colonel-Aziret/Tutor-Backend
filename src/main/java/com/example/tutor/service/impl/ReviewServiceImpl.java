@@ -10,9 +10,7 @@ import com.example.tutor.db.repository.TutorReviewRepository;
 import com.example.tutor.db.repository.specification.TutorReviewSpecification;
 import com.example.tutor.exception.ForbiddenException;
 import com.example.tutor.exception.NotFoundException;
-import com.example.tutor.model.tutorDetails.PageTutorReviewResponseDto;
-import com.example.tutor.model.tutorDetails.TutorReviewFilterDto;
-import com.example.tutor.model.tutorDetails.TutorReviewRequestDto;
+import com.example.tutor.model.tutorDetails.*;
 import com.example.tutor.service.ReviewService;
 import com.example.tutor.service.SysUserService;
 import com.example.tutor.util.FileUtils;
@@ -42,7 +40,13 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public PageTutorReviewResponseDto getAllComments(TutorReviewFilterDto filter) {
-        Specification<TutorReview> specification = new TutorReviewSpecification(filter);
+        Specification<TutorReview> baseSpec = new TutorReviewSpecification(filter);
+
+        List<TutorReview> allReviews = tutorReviewRepository.findAll(baseSpec);
+
+        Specification<TutorReview> rootOnlySpec = baseSpec.and((root, query, cb) ->
+                cb.isNull(root.get("parent"))
+        );
 
         Pageable pageable = PageRequest.of(
                 BaseController.getPage(filter.getPage()),
@@ -50,8 +54,19 @@ public class ReviewServiceImpl implements ReviewService {
                 Sort.by(Sort.Direction.DESC, "createdTime")
         );
 
-        Page<TutorReview> page = tutorReviewRepository.findAll(specification, pageable);
-        return PageTutorReviewResponseDto.from(page, fileUtils);
+        Page<TutorReview> rootPage = tutorReviewRepository.findAll(rootOnlySpec, pageable);
+
+        List<TutorReviewResponseDto> rootDtos = rootPage.getContent().stream()
+                .map(r -> TutorReviewResponseDto.from(r, fileUtils, allReviews))
+                .collect(Collectors.toList());
+
+        return PageTutorReviewResponseDto.builder()
+                .totalPages(rootPage.getTotalPages())
+                .totalElements(rootPage.getTotalElements())
+                .currentPage(rootPage.getNumber())
+                .size(rootPage.getSize())
+                .content(rootDtos)
+                .build();
     }
 
 
@@ -95,27 +110,83 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public void addReview(TutorReviewRequestDto requestDto) {
         SysUser author = sysUserService.getFromContext();
-        TutorDetails tutor = tutorDetailsRepository.findByUserId(requestDto.getTutorId())
-                .orElseThrow(() -> new NotFoundException("tutor.not_found"));
 
         if (!author.isCanComment()) {
             throw new AccessDeniedException("Вы не можете оставлять комментарии");
+        }
+
+        TutorDetails tutor = tutorDetailsRepository.findByUserId(requestDto.getTutorId())
+                .orElseThrow(() -> new NotFoundException("tutor.not_found"));
+
+        boolean isSelfReview = author.getId().equals(tutor.getUser().getId());
+        boolean isTutor = author.getRoles().stream()
+                .anyMatch(r -> r.getAlias().equalsIgnoreCase("TUTOR"));
+
+        if (isTutor && !isSelfReview) {
+            throw new AccessDeniedException("Тьютор может оставлять комментарии только у себя");
+        }
+
+        if (requestDto.getParentId() != null) {
+            throw new IllegalArgumentException("Для ответа используйте отдельный endpoint /comment/reply");
+        }
+
+        Integer rating = null;
+        if (isSelfReview) {
+            if (requestDto.getRating() != null) {
+                throw new IllegalArgumentException("Тьютору нельзя ставить себе рейтинг");
+            }
+        } else {
+            if (requestDto.getRating() == null || requestDto.getRating() < 1 || requestDto.getRating() > 5) {
+                throw new IllegalArgumentException("Оценка обязательна и должна быть от 1 до 5");
+            }
+            rating = requestDto.getRating();
         }
 
         TutorReview review = TutorReview.builder()
                 .tutor(tutor)
                 .author(author)
                 .comment(requestDto.getComment())
-                .rating(requestDto.getRating())
+                .rating(rating)
+                .parent(null)
                 .build();
 
         tutorReviewRepository.save(review);
 
-        List<TutorReview> all = tutorReviewRepository.findByTutor(tutor);
-        double avg = all.stream().mapToInt(TutorReview::getRating).average().orElse(0);
-        tutor.setRate(avg);
+        List<TutorReview> rootReviews = tutorReviewRepository.findByTutor(tutor).stream()
+                .filter(r -> r.getParent() == null && r.getRating() != null)
+                .toList();
 
+        double avg = rootReviews.stream()
+                .mapToInt(TutorReview::getRating)
+                .average()
+                .orElse(0);
+
+        tutor.setRate(avg);
         tutorDetailsRepository.save(tutor);
+    }
+
+    @Transactional
+    public void replyToComment(TutorReplyRequestDto requestDto) {
+        SysUser author = sysUserService.getFromContext();
+
+        if (!author.isCanComment()) {
+            throw new AccessDeniedException("Вы не можете оставлять комментарии");
+        }
+
+        TutorDetails tutor = tutorDetailsRepository.findByUserId(requestDto.getTutorId())
+                .orElseThrow(() -> new NotFoundException("tutor.not_found"));
+
+        TutorReview parent = tutorReviewRepository.findById(requestDto.getParentId())
+                .orElseThrow(() -> new NotFoundException("parent_comment.not_found"));
+
+        TutorReview reply = TutorReview.builder()
+                .tutor(tutor)
+                .author(author)
+                .comment(requestDto.getComment())
+                .parent(parent)
+                .build();
+
+        tutorReviewRepository.save(reply);
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.example.tutor.model.tutorDetails;
 
+import com.example.tutor.db.entity.TutorReview;
 import com.example.tutor.db.entity.sys.TutorDetails;
 import com.example.tutor.util.FileUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,22 +24,23 @@ public class TutorDetailsResponseDto {
     String cityName;
     @Schema(description = "Средняя оценка тьютора")
     Double rate;
-    String telegram;
     Integer experience;
 
     @Schema(description = "Отзывы")
     List<TutorReviewResponseDto> reviews;
 
     public static TutorDetailsResponseDto from(TutorDetails td, FileUtils fileUtils) {
+        List<TutorReview> allReviews = td.getReviews() != null ? td.getReviews() : Collections.emptyList();
+
+        List<TutorReviewResponseDto> rootReviews = allReviews.stream()
+                .filter(r -> r.getParent() == null)
+                .map(r -> TutorReviewResponseDto.from(r, fileUtils, allReviews))
+                .toList();
+
         return TutorDetailsResponseDto.builder()
                 .rate(td.getRate())
-                .reviews(td.getReviews() != null
-                        ? td.getReviews().stream()
-                        .map(r -> TutorReviewResponseDto.from(r, fileUtils))
-                        .toList()
-                        : Collections.emptyList())
+                .reviews(rootReviews)
                 .price(td.getPrice())
-                .telegram(td.getTelegram())
                 .experience(td.getExperience())
                 .aboutMe(td.getAboutMe())
                 .online(td.getOnline())

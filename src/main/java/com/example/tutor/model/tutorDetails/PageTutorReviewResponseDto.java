@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Page;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,15 +22,21 @@ public class PageTutorReviewResponseDto extends BasePageResponse {
     @Schema(description = "Контент (список отзывов)", implementation = TutorReviewResponseDto.class)
     private List<TutorReviewResponseDto> content;
 
-    public static PageTutorReviewResponseDto from(Page<TutorReview> page, FileUtils fileUtils) {
+    @Schema(description = "Текущая страница")
+    private int currentPage;
+
+    public static PageTutorReviewResponseDto from(Page<TutorReview> rootPage, List<TutorReview> allReviews, FileUtils fileUtils) {
+        List<TutorReviewResponseDto> rootResponses = rootPage.getContent().stream()
+                .filter(r -> r.getParent() == null)
+                .map(r -> TutorReviewResponseDto.from(r, fileUtils, allReviews))
+                .collect(Collectors.toList());
+
         return PageTutorReviewResponseDto.builder()
-                .content(page.getContent().stream()
-                        .map(review -> TutorReviewResponseDto.from(review, fileUtils))
-                        .collect(Collectors.toList()))
-                .page(page.getNumber() + 1)
-                .size(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
+                .totalPages(rootPage.getTotalPages())
+                .totalElements(rootPage.getTotalElements())
+                .currentPage(rootPage.getNumber())
+                .size(rootPage.getSize())
+                .content(rootResponses)
                 .build();
     }
 }

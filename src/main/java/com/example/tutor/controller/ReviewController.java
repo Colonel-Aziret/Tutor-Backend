@@ -2,6 +2,7 @@ package com.example.tutor.controller;
 
 import com.example.tutor.model.BaseResponse;
 import com.example.tutor.model.tutorDetails.PageTutorReviewResponseDto;
+import com.example.tutor.model.tutorDetails.TutorReplyRequestDto;
 import com.example.tutor.model.tutorDetails.TutorReviewFilterDto;
 import com.example.tutor.model.tutorDetails.TutorReviewRequestDto;
 import com.example.tutor.service.ReviewService;
@@ -80,6 +81,30 @@ public class ReviewController {
                         .res(null)
                         .build(),
                 HttpStatus.OK
+        );
+    }
+    @PostMapping("/comment/reply")
+    @Operation(summary = "Ответить на комментарий",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "DTO для ответа",
+                    content = @Content(schema = @Schema(implementation = TutorReplyRequestDto.class))
+            ),
+            parameters = @Parameter(
+                    required = true,
+                    description = "JWT токен",
+                    in = ParameterIn.HEADER,
+                    name = "Authorization",
+                    schema = @Schema(type = "string", format = "jwt"))
+    )
+    public ResponseEntity<BaseResponse> replyToComment(@Validated @RequestBody TutorReplyRequestDto requestDto) {
+        service.replyToComment(requestDto);
+        return ResponseEntity.ok(
+                BaseResponse.builder()
+                        .success(BaseController.Constants.SUCCESS)
+                        .msg("Ответ добавлен")
+                        .res(null)
+                        .build()
         );
     }
 

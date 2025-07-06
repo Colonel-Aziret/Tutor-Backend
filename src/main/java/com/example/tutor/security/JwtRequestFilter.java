@@ -40,31 +40,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-//            throws ServletException, IOException {
-//        String requestURI = request.getRequestURI();
-//
-//        if (isPublicEndpoint(requestURI)) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
-//
-//        final String authorizationHeader = request.getHeader("Authorization");
-//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-//            String jwt = authorizationHeader.substring(7);
-//            authenticateUser(jwt, request, response);
-//        } else {
-//            if (!response.isCommitted()) {
-//                sendJsonErrorResponse(response, "error.token.expired_or_invalid", HttpStatus.FORBIDDEN);
-//            }
-//            return;
-//        }
-//        if (!response.isCommitted()) {
-//            chain.doFilter(request, response);
-//        }
-//    }
-//
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
@@ -74,32 +49,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             authenticateUser(jwt, request, response);
         }
         chain.doFilter(request, response);
-    }
-
-    private boolean isPublicEndpoint(String uri) {
-        return uri.equals(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[0]) ||
-                uri.equals(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[1]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[2]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[3]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[4]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[5]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[6]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[7]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[8]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[9]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[10]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[11]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[12]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[13]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[14]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[15]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[16]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[17]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[18]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[19]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[20]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[21]) ||
-                uri.startsWith(appContextPath + SecurityConfig.Constants.PUBLIC_ENDPOINTS[22]) ;
     }
 
     private void authenticateUser(String jwt, HttpServletRequest request, HttpServletResponse response) throws IOException {

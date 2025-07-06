@@ -97,6 +97,9 @@ public class SysUserResponseDto {
     @Schema(description = "Email")
     String email;
 
+    @Schema(description = "Telegram")
+    String telegram;
+
     @Schema(description = "Email подтверждён")
     Boolean emailVerified;
 
@@ -164,6 +167,7 @@ public class SysUserResponseDto {
                 .countryCode(countryCode)
                 .phoneNumberVerified(user.getPhoneNumberVerified())
                 .email(user.getEmail())
+                .telegram(user.getTelegram())
                 .emailVerified(user.isEmailVerified())
                 .tutorDetails(details != null ? TutorDetailsResponseDto.from(details, fileUtils) : null)
                 .tutorEducations(educationList != null ? educationList.stream()
@@ -236,6 +240,7 @@ public class SysUserResponseDto {
                 .countryCode(countryCode)
                 .phoneNumberVerified(user.getPhoneNumberVerified())
                 .email(user.getEmail())
+                .telegram(user.getTelegram())
                 .emailVerified(user.isEmailVerified())
                 .userPhoto(photoDto)
                 .build();

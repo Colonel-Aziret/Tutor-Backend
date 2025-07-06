@@ -184,6 +184,7 @@ public class SysUserServiceImpl implements SysUserService {
 
         SysUser user = SysUser.builder()
                 .age(userDto.getAge())
+                .telegram(userDto.getTelegram())
                 .name(userDto.getName())
                 .secondName(userDto.getSecondName())
                 .email(userDto.getEmail())
@@ -204,7 +205,6 @@ public class SysUserServiceImpl implements SysUserService {
                     .user(user)
                     .price(userDto.getTutorDetails().getPrice())
                     .city(city)
-                    .telegram(userDto.getTutorDetails().getTelegram())
                     .experience(userDto.getTutorDetails().getExperience())
                     .aboutMe(userDto.getTutorDetails().getAboutMe())
                     .online(userDto.getTutorDetails().getOnline())
@@ -326,6 +326,7 @@ public class SysUserServiceImpl implements SysUserService {
 
         user.setName(userDto.getName());
         user.setAge(userDto.getAge());
+        user.setTelegram(userDto.getTelegram());
         user.setSecondName(userDto.getSecondName());
         user.setTemporaryAccessUntilTime(userDto.getTemporaryAccessUntilTime());
         user.setEditedTime(new Date());
@@ -355,7 +356,6 @@ public class SysUserServiceImpl implements SysUserService {
             details.setOffline(userDto.getTutorDetails().getOffline());
             details.setAtTutor(userDto.getTutorDetails().getAtTutor());
             details.setAddress(userDto.getTutorDetails().getAddress());
-            details.setTelegram(userDto.getTutorDetails().getTelegram());
             details.setExperience(userDto.getTutorDetails().getExperience());
 
             tutorDetailsRepository.save(details);

@@ -26,6 +26,18 @@ public class SysUserSpecification implements Specification<SysUser> {
                 predicates.add(cb.equal(root.get("isBanned"), filter.getIsBanned()));
             }
 
+            if (filter.getDeleted() != null) {
+                predicates.add(cb.equal(root.get("deleted"), filter.getDeleted()));
+            }
+
+            if (filter.getPhoneNumber() != null && !filter.getPhoneNumber().isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("phoneNumber")), "%" + filter.getPhoneNumber().toLowerCase() + "%"));
+            }
+
+            if (filter.getTelegram() != null && !filter.getTelegram().isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("telegram")), "%" + filter.getTelegram().toLowerCase() + "%"));
+            }
+
             Join<SysUser, TutorDetails> tutorJoin = root.join("tutorDetails", JoinType.LEFT);
 
             if (filter.getMinRate() != null) {
@@ -44,10 +56,6 @@ public class SysUserSpecification implements Specification<SysUser> {
                 predicates.add(cb.lessThanOrEqualTo(tutorJoin.get("price"), filter.getMaxPrice()));
             }
 
-            if (filter.getCityId() != null) {
-                predicates.add(cb.equal(tutorJoin.get("city").get("id"), filter.getCityId()));
-            }
-
             if (filter.getOnline() != null) {
                 predicates.add(cb.equal(tutorJoin.get("online"), filter.getOnline()));
             }
@@ -60,36 +68,35 @@ public class SysUserSpecification implements Specification<SysUser> {
                 predicates.add(cb.equal(tutorJoin.get("atTutor"), filter.getAtTutor()));
             }
 
+            if (filter.getCityIds() != null && !filter.getCityIds().isEmpty()) {
+                predicates.add(tutorJoin.get("city").get("id").in(filter.getCityIds()));
+            }
+
             if (filter.getFullName() != null && !filter.getFullName().isEmpty()) {
                 String[] nameParts = filter.getFullName().toLowerCase().split(" ");
                 List<Predicate> namePredicates = new ArrayList<>();
                 for (String part : nameParts) {
                     namePredicates.add(cb.or(
                             cb.like(cb.lower(root.get("secondName")), part + "%"),
-                            cb.like(cb.lower(root.get("name")), part + "%"),
-                            cb.like(cb.lower(root.get("patronymic")), part + "%")
+                            cb.like(cb.lower(root.get("name")), part + "%")
                     ));
                 }
                 predicates.add(cb.and(namePredicates.toArray(new Predicate[0])));
             }
 
-            if (filter.getDeleted() != null) {
-                predicates.add(cb.equal(root.get("deleted"), filter.getDeleted()));
+            if (filter.getExperience() != null) {
+                Join<TutorDetails, SubjectExperience> expJoin = tutorJoin.join("subjectExperiences", JoinType.LEFT);
+                predicates.add(cb.greaterThanOrEqualTo(expJoin.get("years"), filter.getExperience()));
+            }
+
+            if (filter.getSubjectIds() != null && !filter.getSubjectIds().isEmpty()) {
+                Join<TutorDetails, SubjectExperience> subjectJoin = tutorJoin.join("subjectExperiences", JoinType.LEFT);
+                predicates.add(subjectJoin.get("subject").get("id").in(filter.getSubjectIds()));
             }
 
             if (filter.getRolesIds() != null && !filter.getRolesIds().isEmpty()) {
                 Join<Object, Object> rolesJoin = root.join("roles");
                 predicates.add(rolesJoin.get("id").in(filter.getRolesIds()));
-            }
-
-            if (filter.getTelegram() != null && !filter.getTelegram().isBlank()) {
-                predicates.add(cb.like(cb.lower(root.get("telegram")), "%" + filter.getTelegram().toLowerCase() + "%"));
-            }
-
-            if (filter.getExperience() != null) {
-                Join<TutorDetails, SubjectExperience> expJoin = tutorJoin.join("subjectExperiences", JoinType.LEFT);
-                // Предположим, что есть поле "years" или аналогичное
-                predicates.add(cb.greaterThanOrEqualTo(expJoin.get("years"), filter.getExperience()));
             }
 
             if (filter.getIsTutor() != null) {

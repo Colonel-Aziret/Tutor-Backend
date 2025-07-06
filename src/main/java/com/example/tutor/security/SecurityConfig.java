@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/comment-unban/{userId}").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/user/delete-comment/{id}").hasAnyAuthority("SUPER_ADMIN", "STUDENT")
                         .requestMatchers("/user/upload-photo").hasAnyAuthority("SUPER_ADMIN", "TUTOR", "STUDENT")
-                        .requestMatchers("/user/comment").hasAnyAuthority("SUPER_ADMIN", "STUDENT")
+                        .requestMatchers("/user/comment").hasAnyAuthority("SUPER_ADMIN", "STUDENT", "TUTOR")
                         .requestMatchers(Constants.PUBLIC_ENDPOINTS).permitAll()
 
                         .anyRequest().authenticated()
